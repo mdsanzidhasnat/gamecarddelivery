@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
+import { LAYOUT_MAX_WIDTH } from "../../App";
 export default function Header() {
   const TOPBAR_HEIGHT = 50; // Topbar height in px
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -9,19 +10,20 @@ export default function Header() {
   const styles = {
     wrapper: {
       width: "100%",
-      backgroundColor: "#c41200",
-      position: "sticky",
+      position: "fixed",
       top: TOPBAR_HEIGHT,
+      left: 0,
       zIndex: 999,
       fontFamily:
         "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+      backgroundColor: "#c41200",
     },
     container: {
-      maxWidth: "1200px",
-      width: "100%",
+      maxWidth: LAYOUT_MAX_WIDTH,
+      // align items to the left so nav items appear more to the left side
       margin: "0 auto",
       display: "flex",
-      justifyContent: "center",
+      justifyContent: "flex-start", // <- changed from "center"
       alignItems: "center",
       padding: "0 20px",
       height: "55px",
@@ -31,13 +33,14 @@ export default function Header() {
     nav: {
       display: "flex",
       gap: "30px",
-      fontSize: "14px",
+      fontSize: "12px",
       fontWeight: "500",
       color: "#fff",
       textTransform: "uppercase",
       alignItems: "center",
-      justifyContent: "center",
+      justifyContent: "flex-start", // <- changed from "center"
       flexGrow: 1,
+      paddingLeft: "4px", // slight left offset
     },
     cartWrapper: {
       backgroundColor: "#8B0000",
@@ -77,7 +80,7 @@ export default function Header() {
 
   // Dropdown data
   const gameCardsItems = [
-    { label: "Apple/iTunes Gift Cards", href: "/apple" }, // ✅ Updated to React SPA page
+    { label: "Apple/iTunes Gift Cards", href: "/apple" },
     { label: "Google Play Gift Cards", href: "/buy-game-cards-online/categories/us-google-play-cards" },
     { label: "Playstation Gift Cards", href: "/buy-game-cards-online/categories/playstation-store" },
     { label: "Nintendo eShop Gift Cards", href: "/buy-game-cards-online/nintendo-eshop" },
@@ -209,7 +212,6 @@ export default function Header() {
   );
 }
 
-// 🔹 Helper components for cleaner structure
 function Dropdown({ label, items, active, onEnter, onLeave, twoColumns }) {
   const baseStyle = {
     display: "flex",
@@ -225,9 +227,10 @@ function Dropdown({ label, items, active, onEnter, onLeave, twoColumns }) {
     boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
     border: "1px solid #ddd",
     borderRadius: "4px",
-    minWidth: twoColumns ? "600px" : "250px",
+    minWidth: twoColumns ? "500px" : "230px", 
     zIndex: 1000,
     display: active ? "block" : "none",
+    padding: "12px 0", 
   };
 
   const dropdownListStyle = {

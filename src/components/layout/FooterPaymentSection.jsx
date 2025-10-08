@@ -43,6 +43,7 @@ const FooterPaymentSection = () => {
               style={{
                 margin: "0 0 6px 0",
                 fontSize: "14px",
+                marginRight: "100px",
                 fontWeight: 600,
                 color: "#ffffff",
               }}
@@ -50,7 +51,6 @@ const FooterPaymentSection = () => {
               Payment Methods We Accept
             </h6>
             <img
-              alt="credit cards"
               loading="lazy"
               width="255"
               height="28"
@@ -60,8 +60,38 @@ const FooterPaymentSection = () => {
                 display: "block",
                 filter: "brightness(0) invert(1)",
               }}
-              src="/_next/image?url=%2Fstatic%2Fimg%2Ficons%2Fcredit-cards.png&w=640&q=75"
             />
+
+            {/* New icons row */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginTop: "8px",
+              }}
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
+                alt="Visa"
+                style={{ height: "20px", filter: "brightness(0) invert(1)" }}
+              />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
+                alt="PayPal"
+                style={{ height: "20px", filter: "brightness(0) invert(1)" }}
+              />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo_%282018%29.svg"
+                alt="Amex"
+                style={{ height: "20px", filter: "brightness(0) invert(1)" }}
+              />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png"
+                alt="MasterCard"
+                style={{ height: "20px", filter: "brightness(0) invert(1)" }}
+              />
+            </div>
           </div>
 
           {/* Language Selection Column */}

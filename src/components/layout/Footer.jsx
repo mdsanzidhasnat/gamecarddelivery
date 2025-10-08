@@ -1,4 +1,5 @@
 import React from "react";
+import { FaFacebookF, FaTwitter } from "react-icons/fa";
 
 export default function Footer() {
   const styles = {
@@ -89,6 +90,8 @@ export default function Footer() {
       border: "2px solid rgba(255,255,255,0.08)",
       fontSize: "16px",
       color: "#9fb5d9",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
     },
     reviewsWrap: {
       position: "absolute",
@@ -138,9 +141,10 @@ export default function Footer() {
           </ul>
 
           <div style={styles.disclaimer}>
-            <strong>Disclaimer:</strong> The businesses represented are not affiliated or
-            sponsors of Card Delivery. The logos and identifying trademarks of each
-            company are owned by each company and/or its affiliates.
+            <strong>Disclaimer:</strong> The businesses represented are not
+            affiliated or sponsors of Card Delivery. The logos and identifying
+            trademarks of each company are owned by each company and/or its
+            affiliates.
             <div style={{ marginTop: "12px" }}>
               All prices are in USD. Card Delivery
             </div>
@@ -186,7 +190,11 @@ export default function Footer() {
         <div style={{ ...styles.column, minWidth: "220px" }}>
           <div style={styles.heading}>Contact Our Support Team</div>
           <div
-            style={{ fontStyle: "italic", color: "#9a9fa3", marginBottom: "10px" }}
+            style={{
+              fontStyle: "italic",
+              color: "#9a9fa3",
+              marginBottom: "10px",
+            }}
           >
             Email Or Call Us - Available 24/7!
           </div>
@@ -207,10 +215,10 @@ export default function Footer() {
 
           <div style={styles.socialRow}>
             <div style={styles.social} aria-label="facebook">
-              f
+              <FaFacebookF />
             </div>
             <div style={styles.social} aria-label="twitter">
-              t
+              <FaTwitter />
             </div>
           </div>
         </div>

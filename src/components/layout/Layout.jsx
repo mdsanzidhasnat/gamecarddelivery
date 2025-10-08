@@ -297,20 +297,24 @@ const TwoColumnPromo = () => {
 const Layout = () => {
   const navigate = useNavigate();
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
 
-  // Banner images array with imported images
-  const bannerImages = [
+  // Banner data array with images and titles
+  const bannerData = [
     {
       src: playstationBanner,
       alt: "PlayStation Gift Cards Banner Slide 1",
+      title: "PlayStation Gift Cards",
     },
     {
       src: razerGoldBanner,
       alt: "Razer Gold Gift Cards Banner Slide 2",
+      title: "Razer Gold Gift Cards",
     },
     {
       src: steamBanner,
       alt: "Steam Gift Cards Banner Slide 3",
+      title: "Steam Gift Cards",
     },
   ];
 
@@ -349,31 +353,76 @@ const Layout = () => {
   // Rotate banners every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentAdIndex((prevIndex) => (prevIndex + 1) % bannerImages.length);
+      setCurrentAdIndex((prevIndex) => (prevIndex + 1) % bannerData.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [bannerImages.length]);
+  }, [bannerData.length]);
 
   // Manual banner navigation
   const goToBanner = (index) => {
     setCurrentAdIndex(index);
   };
 
+  // Auto-scroll brands functionality
+  useEffect(() => {
+    const scrollContainer = document.querySelector(".brandStripInner");
+    if (!scrollContainer) return;
+
+    let scrollInterval;
+
+    const startScrolling = () => {
+      setIsScrolling(true);
+      scrollInterval = setInterval(() => {
+        if (scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth - 1) {
+          scrollContainer.scrollLeft = 0;
+        } else {
+          scrollContainer.scrollLeft += 1;
+        }
+      }, 20);
+    };
+
+    const stopScrolling = () => {
+      setIsScrolling(false);
+      clearInterval(scrollInterval);
+    };
+
+    // Start auto-scroll initially
+    startScrolling();
+
+    // Pause on hover
+    const handleMouseEnter = () => stopScrolling();
+    const handleMouseLeave = () => startScrolling();
+
+    scrollContainer.addEventListener("mouseenter", handleMouseEnter);
+    scrollContainer.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      clearInterval(scrollInterval);
+      scrollContainer.removeEventListener("mouseenter", handleMouseEnter);
+      scrollContainer.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
   const styles = {
     mainContainer: {
       minHeight: "100vh",
-      backgroundColor: "#ffffff",
+      backgroundColor: "#E4E4E4", // <-- updated background color
       fontFamily: "Arial, sans-serif",
       color: "#2c3e50",
       lineHeight: 1.4,
-      marginTop: 0,
-      paddingTop: 0,
+      margin: 0,
+      padding: 0, // removed outer padding to eliminate left/right gap
+      width: "100%",
+      boxSizing: "border-box",
+      overflowX: "hidden", // prevent horizontal scroll if any child overflows
     },
     content: {
       maxWidth: "1200px",
       margin: "0 auto",
-      padding: "0 20px 20px 20px",
+      padding: "0 0 20px 0", // removed side padding to ensure no gap
+      width: "100%",
+      boxSizing: "border-box",
     },
     hero: {
       textAlign: "center",
@@ -392,15 +441,23 @@ const Layout = () => {
       position: "relative",
       overflow: "hidden",
     },
+    heroSlider: {
+      display: "flex",
+      width: `${bannerData.length * 100}%`,
+      height: "100%",
+      transition: "transform 0.5s ease-in-out",
+      transform: `translateX(-${(100 / bannerData.length) * currentAdIndex}%)`,
+    },
+    bannerSlide: {
+      width: `${100 / bannerData.length}%`,
+      height: "100%",
+      flexShrink: 0,
+    },
     bannerImage: {
       width: "100%",
       height: "100%",
       objectFit: "cover",
       borderRadius: "0",
-      position: "absolute",
-      top: 0,
-      left: 0,
-      transition: "opacity 0.5s ease-in-out",
     },
     heroTopOverlay: {
       position: "absolute",
@@ -421,15 +478,22 @@ const Layout = () => {
       color: "#fff",
       textShadow: "0 2px 4px rgba(0,0,0,0.5)",
     },
-    brandStrip: {
+    // UPDATED: Brand strip container with auto-scroll
+    brandStripContainer: {
+      width: "100%",
+      overflow: "hidden",
+      position: "relative",
+      padding: "12px 0",
+      marginTop: "12px",
+      marginBottom: "18px",
+    },
+    brandStripInner: {
       display: "flex",
       gap: "12px",
       alignItems: "center",
-      justifyContent: "center",
-      padding: "12px 8px",
-      marginTop: "12px",
-      marginBottom: "18px",
-      overflowX: "auto",
+      width: "max-content",
+      animation: isScrolling ? "none" : "scroll 30s linear infinite",
+      cursor: "grab",
     },
     // UPDATED: Brand item with image - made larger
     brandItem: {
@@ -445,11 +509,12 @@ const Layout = () => {
       boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
       overflow: "hidden",
       flexShrink: 0,
+      transition: "transform 0.2s ease, box-shadow 0.2s ease",
     },
     brandImage: {
       width: "100%",
       height: "100%",
-      objectFit: "contain",
+      objectFit: "cover",
       borderRadius: "4px",
     },
     heroHeading: {
@@ -512,7 +577,7 @@ const Layout = () => {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      minHeight: "90px",
+      minHeight: "100px",
       boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
       backgroundSize: "cover",
       backgroundPosition: "center",
@@ -520,6 +585,7 @@ const Layout = () => {
       position: "relative",
       overflow: "hidden",
       cursor: "pointer",
+      transition: "transform 0.2s ease",
     },
     promoCardDarkOverlay: {
       position: "absolute",
@@ -568,7 +634,7 @@ const Layout = () => {
       gap: "20px",
       marginBottom: "40px",
     },
-    // UPDATED: Product card - height increased from 380px to 420px
+    // UPDATED: Product card - height increased from 380px to 420px with hover effects
     productCard: {
       border: "1px solid #e5e5e5",
       borderRadius: "8px",
@@ -578,10 +644,11 @@ const Layout = () => {
       boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
       display: "flex",
       flexDirection: "column",
-      height: "420px", // Increased from 380px to 420px
+      height: "420px",
       minWidth: "0",
       position: "relative",
-      transition: "transform 0.2s ease, box-shadow 0.2s ease",
+      transition: "transform 0.3s ease, box-shadow 0.3s ease",
+      cursor: "pointer",
     },
     productImageContainer: {
       width: "100%",
@@ -599,6 +666,7 @@ const Layout = () => {
       height: "100%",
       objectFit: "contain",
       borderRadius: "4px",
+      transition: "transform 0.3s ease",
     },
     productAmount: {
       fontSize: "2.8rem",
@@ -645,7 +713,32 @@ const Layout = () => {
       fontSize: "1rem",
       textTransform: "uppercase",
       letterSpacing: "0.5px",
-      transition: "background-color 0.2s ease",
+      transition: "background-color 0.3s ease, transform 0.2s ease",
+    },
+    priceContainer: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: "10px",
+      marginBottom: "8px",
+      fontSize: "0.9rem",
+    },
+    productOriginalPrice: {
+      color: "#7f8c8d",
+      marginRight: "8px",
+    },
+    productNowPrice: {
+      color: "#e74c3c",
+      fontWeight: "bold",
+    },
+    stars: {
+      color: "#f39c12",
+      fontSize: "1rem",
+      marginBottom: "4px",
+    },
+    reviews: {
+      fontSize: "0.85rem",
+      color: "#7f8c8d",
     },
     featuresRow: {
       display: "grid",
@@ -661,6 +754,7 @@ const Layout = () => {
       minHeight: "160px",
       boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
       border: "1px solid #eef0f2",
+      transition: "transform 0.2s ease, box-shadow 0.2s ease",
     },
     featureIcon: {
       width: "44px",
@@ -696,6 +790,7 @@ const Layout = () => {
       boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
       border: "1px solid #eef0f2",
       textAlign: "center",
+      transition: "transform 0.2px ease, box-shadow 0.2px ease",
     },
     howItWorksIconImg: {
       width: "126px",
@@ -704,6 +799,7 @@ const Layout = () => {
       objectFit: "cover",
       marginBottom: "10px",
       display: "inline-block",
+      transition: "transform 0.3s ease",
     },
     reviews: {
       textAlign: "center",
@@ -728,6 +824,7 @@ const Layout = () => {
       boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
       border: "1px solid #eef0f2",
       textAlign: "center",
+      transition: "transform 0.2px ease, box-shadow 0.2px ease",
     },
     reviewStars: {
       color: "#f39c12",
@@ -749,12 +846,66 @@ const Layout = () => {
       borderRadius: "50%",
       backgroundColor: "rgba(255,255,255,0.5)",
       cursor: "pointer",
-      transition: "background-color 0.3s ease",
+      transition: "background-color 0.3s ease, transform 0.2s ease",
     },
     bannerDotActive: {
       backgroundColor: "#fff",
+      transform: "scale(1.2)",
     },
   };
+
+  // CSS for auto-scroll animation
+  const scrollStyles = `
+    /* reset body margin just in case (ensures no left/right gap) */
+    body { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(calc(-140px * 7 - 12px * 6)); }
+    }
+    
+    .brandStripInner:hover {
+      animation-play-state: paused;
+    }
+    
+    .brandItem:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .productCard:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .productCard:hover .productImage {
+      transform: scale(1.05);
+    }
+    
+    .buyButton:hover {
+      background-color: #219653;
+      transform: translateY(-2px);
+    }
+    
+    .featureCard:hover,
+    .howItWorksCard:hover,
+    .reviewCard:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+    
+    .howItWorksCard:hover .howItWorksIconImg {
+      transform: scale(1.1);
+    }
+    
+    .promoCard:hover {
+      transform: translateY(-3px);
+    }
+    
+    .bannerDot:hover {
+      transform: scale(1.3);
+    }
+  `;
 
   // Helper: navigate to checkout
   const goToCheckout = () => {
@@ -771,6 +922,10 @@ const Layout = () => {
       name: "USA Steam Game Card (Email Delivery)",
       imageUrl:
         "https://giftnix-product-images.s3.us-west-2.amazonaws.com/gcd/50-steam-digital-gift-card-email-delivery-2x",
+      originalPrice: "$59.99",
+      nowPrice: "$57.99",
+      stars: "★★★★★",
+      reviewCount: 141,
     },
     {
       id: 2,
@@ -780,6 +935,10 @@ const Layout = () => {
       name: "USA Google Play Card (Email Delivery)",
       imageUrl:
         "https://giftnix-product-images.s3.us-west-2.amazonaws.com/gcd/50-steam-digital-gift-card-email-delivery-2x",
+      originalPrice: "$109.99",
+      nowPrice: "$107.99",
+      stars: "★★★★★",
+      reviewCount: 200,
     },
     {
       id: 3,
@@ -789,6 +948,10 @@ const Layout = () => {
       name: "USA PlayStation Network Card (Email Delivery)",
       imageUrl:
         "https://giftnix-product-images.s3.us-west-2.amazonaws.com/gcd/50-steam-digital-gift-card-email-delivery-2x",
+      originalPrice: "$59.99",
+      nowPrice: "$57.99",
+      stars: "★★★★★",
+      reviewCount: 150,
     },
     {
       id: 4,
@@ -798,6 +961,10 @@ const Layout = () => {
       name: "USA Hulu Gift Card (Email Delivery)",
       imageUrl:
         "https://giftnix-product-images.s3.us-west-2.amazonaws.com/gcd/50-steam-digital-gift-card-email-delivery-2x",
+      originalPrice: "$59.99",
+      nowPrice: "$57.99",
+      stars: "★★★★★",
+      reviewCount: 120,
     },
     {
       id: 5,
@@ -807,32 +974,38 @@ const Layout = () => {
       name: "USA Razer Gold Gift Card (Email Delivery)",
       imageUrl:
         "https://giftnix-product-images.s3.us-west-2.amazonaws.com/gcd/50-steam-digital-gift-card-email-delivery-2x",
+      originalPrice: "$59.99",
+      nowPrice: "$57.99",
+      stars: "★★★★★",
+      reviewCount: 180,
     },
   ];
 
   return (
     <div style={styles.mainContainer}>
+      {/* Inject CSS (including body reset) */}
+      <style>{scrollStyles}</style>
+      
       <main style={styles.content}>
         <section style={styles.hero}>
-          {/* UPDATED: Hero banner with proper image slider and NO blue overlay */}
+          {/* UPDATED: Hero banner with sliding effect */}
           <div style={styles.heroTopBanner}>
-            {/* Banner Images */}
-            {bannerImages.map((banner, index) => (
-              <img
-                key={index}
-                alt={banner.alt}
-                loading="lazy"
-                width="1200"
-                height="260"
-                decoding="async"
-                style={{
-                  ...styles.bannerImage,
-                  opacity: index === currentAdIndex ? 1 : 0,
-                  zIndex: index === currentAdIndex ? 1 : 0,
-                }}
-                src={banner.src}
-              />
-            ))}
+            {/* Slider Container */}
+            <div style={styles.heroSlider}>
+              {bannerData.map((banner, index) => (
+                <div key={index} style={styles.bannerSlide}>
+                  <img
+                    alt={banner.alt}
+                    loading="lazy"
+                    width="1200"
+                    height="260"
+                    decoding="async"
+                    style={styles.bannerImage}
+                    src={banner.src}
+                  />
+                </div>
+              ))}
+            </div>
 
             {/* BUY NOW Button */}
             <div style={styles.heroTopOverlay}>
@@ -849,19 +1022,19 @@ const Layout = () => {
               </div>
             </div>
 
-            {/* Banner Text Content */}
+            {/* Banner Text Content (dynamic title) */}
             <div style={styles.heroTextContent}>
               <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700 }}>
                 Best Online Source for Gift Cards
               </h2>
               <div style={{ marginTop: 8 }}>
-                <strong style={{ fontSize: "1.6rem" }}>Steam Gift Cards</strong>
+                <strong style={{ fontSize: "1.6rem" }}>{bannerData[currentAdIndex].title}</strong>
               </div>
             </div>
 
             {/* Banner Indicator Dots */}
             <div style={styles.bannerIndicator}>
-              {bannerImages.map((_, index) => (
+              {bannerData.map((_, index) => (
                 <div
                   key={index}
                   style={{
@@ -874,18 +1047,31 @@ const Layout = () => {
             </div>
           </div>
 
-          {/* UPDATED: Brand strip with images - now larger */}
-          <div style={styles.brandStrip}>
-            {brandImages.map((brand, index) => (
-              <div key={index} style={styles.brandItem}>
-                <img
-                  src={brand.image}
-                  alt={brand.name}
-                  style={styles.brandImage}
-                  loading="lazy"
-                />
-              </div>
-            ))}
+          {/* UPDATED: Brand strip with auto-scroll animation */}
+          <div style={styles.brandStripContainer}>
+            <div className="brandStripInner" style={styles.brandStripInner}>
+              {brandImages.map((brand, index) => (
+                <div key={index} className="brandItem" style={styles.brandItem}>
+                  <img
+                    src={brand.image}
+                    alt={brand.name}
+                    style={styles.brandImage}
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+              {/* Duplicate for seamless loop */}
+              {brandImages.map((brand, index) => (
+                <div key={`dup-${index}`} className="brandItem" style={styles.brandItem}>
+                  <img
+                    src={brand.image}
+                    alt={brand.name}
+                    style={styles.brandImage}
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
 
           <h1 style={styles.heroHeading}>The Best Source for US Game Cards</h1>
@@ -898,6 +1084,7 @@ const Layout = () => {
           <div style={styles.promoRow}>
             {/* Apple Promo Card */}
             <div
+              className="promoCard"
               style={{
                 ...styles.promoCard,
                 backgroundImage: `url(${appleCalloutImg})`,
@@ -908,7 +1095,10 @@ const Layout = () => {
             </div>
 
             {/* Razer Gold Promo Card */}
-            <div style={{ ...styles.promoCard, backgroundImage: `url(${razerGoldImg})` }}>
+            <div 
+              className="promoCard"
+              style={{ ...styles.promoCard, backgroundImage: `url(${razerGoldImg})` }}
+            >
               <div style={styles.promoCardDarkOverlay}></div>
               <div style={styles.promoContent}>
                 <div style={styles.promoLeft}>
@@ -926,7 +1116,7 @@ const Layout = () => {
         </section>
 
         <section style={styles.featuresRow}>
-          <div style={styles.featureCard}>
+          <div className="featureCard" style={styles.featureCard}>
             <div style={{ ...styles.featureIcon, backgroundColor: "#e74c3c" }}>🎮</div>
             <h3 style={{ marginTop: 0, marginBottom: 6 }}>Game Cards</h3>
             <p style={{ color: "#7f8c8d", margin: 0, fontSize: "0.95rem" }}>
@@ -940,7 +1130,7 @@ const Layout = () => {
             </ul>
           </div>
 
-          <div style={styles.featureCard}>
+          <div className="featureCard" style={styles.featureCard}>
             <div style={{ ...styles.featureIcon, backgroundColor: "#f39c12" }}>🎁</div>
             <h3 style={{ marginTop: 0, marginBottom: 6 }}>Gift Cards</h3>
             <p style={{ color: "#7f8c8d", margin: 0, fontSize: "0.95rem" }}>
@@ -953,7 +1143,7 @@ const Layout = () => {
             </ul>
           </div>
 
-          <div style={styles.featureCard}>
+          <div className="featureCard" style={styles.featureCard}>
             <div style={{ ...styles.featureIcon, backgroundColor: "#27ae60" }}>⚡</div>
             <h3 style={{ marginTop: 0, marginBottom: 6 }}>Instant Delivery</h3>
             <p style={{ color: "#7f8c8d", margin: 0, fontSize: "0.95rem" }}>
@@ -972,7 +1162,12 @@ const Layout = () => {
           {/* UPDATED: Products grid with 5 columns and larger cards */}
           <div style={styles.productsGrid}>
             {products.map((product) => (
-              <div key={product.id} style={styles.productCard}>
+              <div 
+                key={product.id} 
+                className="productCard"
+                style={styles.productCard}
+                onClick={goToCheckout}
+              >
                 <div style={styles.productImageContainer}>
                   <img
                     alt={product.name}
@@ -991,11 +1186,21 @@ const Layout = () => {
                 <div style={styles.productName}>{product.name}</div>
 
                 <button
+                  className="buyButton"
                   style={styles.buyButton}
                   onClick={goToCheckout}
                   aria-label={`Buy ${product.name}`}>
                   <span>BUY NOW</span>
+                  <span>🛒</span>
                 </button>
+
+                <div style={styles.priceContainer}>
+                  <span style={styles.productOriginalPrice}>ORIGINAL: {product.originalPrice}</span>
+                  <span style={styles.productNowPrice}>NOW: {product.nowPrice}</span>
+                </div>
+
+                <div style={styles.stars}>{product.stars}</div>
+                <div style={styles.reviews}>{product.reviewCount} Reviews</div>
               </div>
             ))}
           </div>
@@ -1010,7 +1215,7 @@ const Layout = () => {
         <section style={styles.howItWorks}>
           <h2 style={{ marginBottom: "20px", fontSize: "1.8rem", color: "#2c3e50" }}>HOW IT WORKS</h2>
           <div style={styles.howItWorksRow}>
-            <div style={styles.howItWorksCard}>
+            <div className="howItWorksCard" style={styles.howItWorksCard}>
               <img
                 src={chooseImg}
                 alt="Choose a Game or Gift Card"
@@ -1025,7 +1230,7 @@ const Layout = () => {
                 Choose from a broad selection of game and gift cards including iTunes, Google Play, Steam, Nintendo and many more. Find the perfect gift for a loved one, or a treat for yourself, at home, or on the go with our mobile friendly website!
               </p>
             </div>
-            <div style={styles.howItWorksCard}>
+            <div className="howItWorksCard" style={styles.howItWorksCard}>
               <img
                 src={paymentImg}
                 alt="Payment & Approval"
@@ -1040,7 +1245,7 @@ const Layout = () => {
                 We accept direct PayPal transaction, USA MasterCard, Discover, and American Express. All payments are securely processed via PayPal and not directly on our website, however you do not need a PayPal account to complete your purchase.
               </p>
             </div>
-            <div style={styles.howItWorksCard}>
+            <div className="howItWorksCard" style={styles.howItWorksCard}>
               <img
                 src={emailImg}
                 alt="Fastest Online Email Delivery"
@@ -1062,7 +1267,7 @@ const Layout = () => {
           <h2 style={{ marginBottom: "20px", fontSize: "1.8rem", color: "#2c3e50" }}>REVIEWS</h2>
           <div style={{ marginBottom: "20px", color: "#7f8c8d" }}>8,547 GameCardDelivery Reviews</div>
           <div style={styles.reviewsRow}>
-            <div style={styles.reviewCard}>
+            <div className="reviewCard" style={styles.reviewCard}>
               <h4>Speed is the Key</h4>
               <div style={styles.reviewStars}>★★★★★</div>
               <p style={{ color: "#7f8c8d", margin: 0, fontSize: "0.95rem" }}>
@@ -1073,10 +1278,10 @@ const Layout = () => {
                 <br />OCTOBER 20, 2019
               </p>
             </div>
-            <div style={styles.reviewCard}>
+            <div className="reviewCard" style={styles.reviewCard}>
               <h4>Purchase for Amazon Gift Card</h4>
               <div style={styles.reviewStars}>★★★★★</div>
-              <p style={{ color: "#7f8c8d", margin: 0, fontSize: "0.95pr" }}>
+              <p style={{ color: "#7f8c8d", margin: 0, fontSize: "0.95rem" }}>
                 Purchase for Amazon Gift Card
                 <br />
                 It is my first purchase through GameCardDelivery and the truth is that the satisfaction is total, it was fast easy and safe. For all the aforementioned I recommend to use GameCardDelivery from Venezuela.
@@ -1084,7 +1289,7 @@ const Layout = () => {
                 <br />OCTOBER 20, 2019
               </p>
             </div>
-            <div style={styles.reviewCard}>
+            <div className="reviewCard" style={styles.reviewCard}>
               <h4>Quick and Excellent Service</h4>
               <div style={styles.reviewStars}>★★★★★</div>
               <p style={{ color: "#7f8c8d", margin: 0, fontSize: "0.95rem" }}>

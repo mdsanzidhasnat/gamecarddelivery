@@ -17,6 +17,8 @@ import ApplePage from "./pages/Applepage"; // Apple page
 
 import "./App.css";
 
+export const LAYOUT_MAX_WIDTH = "1200px";
+
 function App() {
   return (
     <Router>
